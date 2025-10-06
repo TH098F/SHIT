@@ -1,0 +1,19 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/clang",
+      "-std=c++17",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "-g",
+      "-c",
+      "-o",
+      "main.o",
+      "main.cpp"
+    ],
+    "directory": "/workspaces/SHIT/prolog",
+    "file": "/workspaces/SHIT/prolog/main.cpp",
+    "output": "/workspaces/SHIT/prolog/main.o"
+  }
+]
