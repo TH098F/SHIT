@@ -2,7 +2,7 @@
 #include "defines.h"
 
 #include <vector>
-#include <array>
+#include <string>
 
 #define MAX_SYMBOLS_PER_FACT 16
 
@@ -22,23 +22,29 @@ inline bool operator!=(const Relation& a, const Relation& b) { return a.id != b.
 
 struct Fact {
     Relation name;
-    u32 symbolCount;
+    u32 symbolCount = 0;
     Symbol symbols[MAX_SYMBOLS_PER_FACT];
 };
 
 struct Rule {
     Relation name;
-    u32 variableCount;
+    u32 variableCount = 0;
     struct Check {
         Relation rel;
         u32 variables[MAX_SYMBOLS_PER_FACT];
     };
-    std::vector<Check> checks;
+    std::vector<Check> checks = {};
 };
 
 struct Interpreter {
-    std::vector<Fact> facts;
-    std::vector<Rule> rules;
+    std::vector<std::string> symbolNames = {};
+
+    std::vector<Fact> facts = {};
+    std::vector<Rule> rules = {};
+
+    void readFile(const char* path);
+
+    void parseQuery(const std::string& query);
 
     std::vector<Fact> getFactsByRelation(Relation rel) {
         std::vector<Fact> res;

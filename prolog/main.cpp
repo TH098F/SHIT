@@ -1,4 +1,5 @@
 #include "interpreter.h"
+#include <iostream>
 
 bool Interpreter::checkFact(Fact* fact, u32 symbolCount, Symbol* symbols) {
     if (fact->symbolCount != symbolCount) return false;
@@ -35,8 +36,32 @@ bool Interpreter::checkRule(Rule* rule, u32 symbolCount, Symbol* symbols) {
     return true;
 }
 
-int main(void) {
+void Interpreter::readFile(const char* path) {
 
+}
+
+void Interpreter::parseQuery(const std::string& query) {
+    
+}
+
+int main(void) {
+    Interpreter intptr = {};
+
+    std::cout << "File: " << std::flush;
+
+    std::string path;
+    std::cin >> path;
+
+    intptr.readFile(path.c_str());
+
+    while (true) {
+        std::cout << "?- " << std::flush;
+
+        std::string query;
+        std::cin >> query;
+
+        intptr.parseQuery(query);
+    }
 
     return 0;
 }
