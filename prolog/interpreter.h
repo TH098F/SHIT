@@ -1,6 +1,8 @@
 #pragma once
 #include "defines.h"
 
+#include <exception>
+#include <stdexcept>
 #include <vector>
 #include <string>
 
@@ -8,65 +10,73 @@
 
 struct Symbol {
     u32 id;
+
+    enum {
+        ANY
+    };
+
+    constexpr operator u32() { return id; }
 };
 
-inline bool operator==(const Symbol& a, const Symbol& b) { return a.id == b.id; }
-inline bool operator!=(const Symbol& a, const Symbol& b) { return a.id != b.id; }
+constexpr bool operator==(Symbol a, Symbol b) { return a.id == b.id; }
+constexpr bool operator!=(Symbol a, Symbol b) { return a.id != b.id; }
 
-struct Relation {
-    u32 id;
-};
-
-inline bool operator==(const Relation& a, const Relation& b) { return a.id == b.id; }
-inline bool operator!=(const Relation& a, const Relation& b) { return a.id != b.id; }
 
 struct Fact {
-    Relation name;
-    u32 symbolCount = 0;
+    Symbol name;
+    u32 symbolCount;
     Symbol symbols[MAX_SYMBOLS_PER_FACT];
+
+    bool check(u32 symbolCount, Symbol* symbols);
+};
+
+enum Operator {
+    AND,
+    OR
+};
+
+union Expression {
+    u8 type : 1;
+    struct {
+        Expression* left;
+        Expression* right;
+        Operator op;
+    } a;
+    struct {
+        Symbol name;
+        u32 symbolCount;
+        Symbol Symbols[MAX_SYMBOLS_PER_FACT];
+    } b;
+
+    bool check(u32 symbolCount, Symbol* symbols);
 };
 
 struct Rule {
-    Relation name;
-    u32 variableCount = 0;
-    struct Check {
-        Relation rel;
-        u32 variables[MAX_SYMBOLS_PER_FACT];
-    };
-    std::vector<Check> checks = {};
+    Symbol name;
+    Expression* startingExpr;
+    Expression expressions[MAX_SYMBOLS_PER_FACT];
+
+    bool check(u32 symbolCount, Symbol* symbols);
 };
 
 struct Interpreter {
-    std::vector<std::string> symbolNames = {};
+    std::vector<Fact> facts;
+    std::vector<Rule> rules;
 
-    std::vector<Fact> facts = {};
-    std::vector<Rule> rules = {};
-
-    void readFile(const char* path);
-
-    void parseQuery(const std::string& query);
-
-    std::vector<Fact> getFactsByRelation(Relation rel) {
-        std::vector<Fact> res;
-        for (u32 i = 0; i < facts.size(); i++) {
-            if (facts[i].name == rel) {
-                res.push_back(facts[i]);
-            }
+    const Fact& getFactByName(Symbol name) {
+        for (const auto& fact : facts) {
+            if (fact.name == name) return fact;
         }
-        return res;
+        throw std::runtime_error("Fact Not Found");
     }
 
-    std::vector<Rule> getRulesByRelation(Relation rel) {
-        std::vector<Rule> res;
-        for (u32 i = 0; i < rules.size(); i++) {
-            if (rules[i].name == rel) {
-                res.push_back(rules[i]);
-            }
+    const Rule& getRuleByName(Symbol name) {
+        for (const auto& rule : rules) {
+            if (rule.name == name) return rule;
         }
-        return res;
+        throw std::runtime_error("Rule Not Found");
     }
 
-    bool checkFact(Fact* fact, u32 symbolCount, Symbol* symbols);
-
-    bool checkRule(Rule* rule, u32 symbolCount, Symbol* symbols);
+    void readFile(const char* name);
+    bool parseQuery(const char* query);
 };
