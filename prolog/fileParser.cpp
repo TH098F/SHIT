@@ -44,13 +44,37 @@ void Interpreter::readFile(const char* name) {
                 lastId++;
                 break;
             default:
-                if (
+                tokens.push_back({.type = Token::SYMBOL, .id = lastId});
+                lastId++;
+                while (!(
                     *c <= 'a' || *c >= 'z' ||
                     *c <= 'A' || *c >= 'Z' ||
                     *c <= '0' || *c >= '9'
-                ) {
-                    throw std::runtime_error("Invalid Syntax");
+                )) {
+                    c++;
                 }
+                break;
+        }
+    }
+
+    for (auto it = tokens.begin(); it != tokens.end(); ++it) {
+        auto& token = *it;
+
+        switch (token.type) {
+            case Token::SYMBOL:
+                if ((token = *(++it)).type != Token::PARAN_OPEN) {
+                    std::runtime_error("Invalid Syntax: Excepted '('");
+                } else {
+
+                }
+                break;
+            case Token::RULE_DELIMITER:
+            case Token::DOT:
+            case Token::COMMA:
+            case Token::SEMI_COLON:
+            case Token::PARAN_OPEN:
+            case Token::PARAN_CLOSE:
+                throw std::runtime_error("Invalid Syntax: Expected symbol name");
                 break;
         }
     }
