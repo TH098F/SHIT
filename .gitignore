@@ -1,0 +1,4 @@
+prolog/.cache/*
+prolog/.cache/**/*
+prolog2/target/*
+prolog2/target/**/*

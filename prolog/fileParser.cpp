@@ -14,6 +14,11 @@ struct Token {
     u32 id;
 };
 
+template<typename T>
+void parseArgs(T& it) {
+
+}
+
 void Interpreter::readFile(const char* name) {
     std::vector<Token> tokens = {};
 
@@ -65,7 +70,7 @@ void Interpreter::readFile(const char* name) {
                 if ((token = *(++it)).type != Token::PARAN_OPEN) {
                     std::runtime_error("Invalid Syntax: Excepted '('");
                 } else {
-
+                    parseArgs(it);
                 }
                 break;
             case Token::RULE_DELIMITER:

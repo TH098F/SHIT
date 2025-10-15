@@ -1,0 +1,10 @@
+[package]
+name = "prolog2"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+
+[[bin]]
+name = "prolog2"
+path = "main.rs"
