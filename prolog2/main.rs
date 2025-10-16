@@ -4,22 +4,38 @@ use std::collections::HashMap;
 use std::fs;
 use std::io::prelude::*;
 
-#[derive(Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Clone, PartialEq, Eq, Hash, Debug)]
 enum Token {
     None,
-    Identifier,
+    Identifier(String),
     RuleDelim,
     Dot,
     Comma,
     SemiColon,
     ParanOpen,
     ParanClose,
-    Variable,
+    Variable(String),
 }
 
+impl Token {
+    fn fromChar(c: char) -> Self {
+        match c {
+            '.' => Self::Dot,
+            ',' => Self::Comma,
+            ';' => Self::SemiColon,
+            '(' => Self::ParanOpen,
+            ')' => Self::ParanClose,
+            ':' => Self::RuleDelim,
+            _ => Self::None
+        }
+    }
+}
+
+#[derive(Debug)]
 enum LexingError {
     InvalidText,
     UnexpectedSymbol,
+    InvalidSyntax,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash)]
@@ -88,7 +104,7 @@ impl LexLuthor {
 
         if !text.is_ascii() { return Err(LexingError::InvalidText); }
 
-        let token = Token::None;
+        let mut nameBuf = String::new();
         for c in text.chars() {
             let nextState = self.stateMap.get(&(self.state, c)).unwrap();
 
@@ -96,8 +112,21 @@ impl LexLuthor {
                 return Err(LexingError::UnexpectedSymbol);
             }
 
+            nameBuf.push(c);
+
             if *nextState != self.state {
-                tokens.push(token);
+                let token = match self.state {
+                    LexerState::ExpectStartOfVarOrIdentifier => None,
+                    LexerState::ExpectIdentifierDef => Some(Token::Identifier(nameBuf.to_owned())),
+                    LexerState::ExpectIdentifierUsage => Some(Token::Identifier(nameBuf.to_owned())),
+                    LexerState::ExpectVariable => Some(Token::Variable(nameBuf.to_owned())),
+                    LexerState::ExpectOperator => Some(Token::fromChar(nameBuf.chars().nth(0).unwrap())),
+                    LexerState::ExpectRuleDelim => None,
+                    LexerState::Trash => return Err(LexingError::InvalidSyntax)
+                };
+
+                if let Some(tok) = token { tokens.push(tok); }
+                nameBuf.clear();
             }
         }
 
@@ -127,14 +156,23 @@ impl TranslationUnit {
     fn text(&self) -> &str {
         &self.content
     }
+
+    fn fromLiteral(text: &str) -> Self {
+        Self { content: text.to_owned() }
+    }
 }
 
 fn main() -> () {
     let lexer = LexLuthor::new();
 
-    let text = TranslationUnit::fromFile("test.p").unwrap();
+    // let text = TranslationUnit::fromFile("test.p").unwrap();
+    let text = TranslationUnit::fromLiteral("test(A):-haha");
 
-    let tokens = lexer.lex(text.text());
+    let tokens = lexer.lex(text.text()).unwrap();
+
+    for t in tokens {
+        println!("{t:?}");
+    }
 
     ()
 }
