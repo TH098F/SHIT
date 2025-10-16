@@ -2,3 +2,5 @@ prolog/.cache/*
 prolog/.cache/**/*
 prolog2/target/*
 prolog2/target/**/*
+prolog3/target/*
+prolog3/target/**/*
